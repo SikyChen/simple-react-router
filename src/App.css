@@ -1,0 +1,81 @@
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+.App {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+}
+
+.menu {
+  width: 100px;
+  background-color: slateblue;
+}
+
+.menu li {
+  line-height: 40px;
+  text-align: center;
+}
+
+.menu li a {
+  color: aliceblue;
+  cursor: pointer;
+}
+
+.content {
+  flex-grow: 1;
+}
+
+.content > div {
+  height: 100%;
+}
+
+.aaaa {
+  background-color: antiquewhite;
+}
+
+.bbbb {
+  background-color: aquamarine;
+}
+
+.cccc {
+  background-color: sandybrown;
+}
+
+.dddd {
+  background-color: rosybrown;
+}
