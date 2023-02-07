@@ -37,8 +37,10 @@
 
 .App {
   width: 100vw;
-  height: 100vh;
+  height: 50vh;
   display: flex;
+  border-bottom: 1px solid #ccc;
+  box-sizing: border-box;
 }
 
 .menu {
