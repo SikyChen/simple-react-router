@@ -1,8 +1,6 @@
-# React-Router-Dom 的简易实现
+![logo](https://cdn.jsdelivr.net/gh/SikyChen/figure-bed@master/images/simple_react_router_logo.png)
 
-## TODO LIST
-- [x] history 模式
-- [ ] hash 模式
+# React-Router-Dom 的简易实现
 
 ## 目录
 1. Router 的功能点分析
@@ -12,10 +10,9 @@
     1. 实现 handleLink 功能
     2. 实现 refresh 功能
 3. 重构
-    1. 实现 context 和 hooks
-    2. 实现 BrowserRouter 容器
-    3. 实现 Link 组件
-    4. 实现 Routes Route 组件
+    1. 实现 BrowserRouter 容器
+    2. 实现 Link 组件
+    3. 实现 Routes Route 组件
 
 # React Router 的实现原理
 
@@ -68,9 +65,9 @@ const routes = [
 ]
 ```
 
-## 实现-1
+# 简易实现
 
-有了上述的 routes 配置，使用如下的代码结构进行渲染。为方便理解，暂不对功能点进行封装：
+对于上述的 routes 配置，搭配如下代码结构进行演示。
 
 ``` javascript
 export default function App() {
@@ -98,15 +95,15 @@ export default function App() {
 }
 ```
 
-### 实现 handleLink
+## 实现 handleLink
 
 前面功能分析时说过，路由的第一个功能点是修改 URL ，而 `handleLink` 方法的目的，就是修改 URL 。
 
-`handleLink` 方法，时绑定在 `a` 标签上的，点击 `a` 标签的默认行为，会造成浏览器请求进而导致刷新，所以这里用 `event.preventDefault()` 来禁用默认行为；
+`handleLink` 方法，是绑定在 `a` 标签上的，点击 `a` 标签的默认行为，会造成浏览器发起请求进而刷新页面，不符合前端路由的需求。所以这里用 `event.preventDefault()` 来禁止默认行为；
 
-禁用默认行为后，再通过 `history.pushState` 方法来修改 URL ；
+禁用默认行为后，再通过 `history.pushState` 方法修改 URL ；
 
-URL 被修改后，需要同步的调用匹配路由的方法，以渲染匹配的路由，这里给该方法取名为 `refresh` ，意为匹配路由并渲染。
+URL 被修改后，需要同步调用匹配路由的方法，以渲染匹配的路由组件，这里给该方法取名为 `refresh` ，意为匹配路由并渲染。
 
 代码如下：
 
@@ -118,7 +115,7 @@ function handleLink(e) {
 }
 ```
 
-### 实现 refresh
+## 实现 refresh
 
 匹配路由并渲染的过程如下：
 1. 获取当前 URL 的 path；
@@ -144,4 +141,164 @@ useEffect(() => {
 }, [])
 ```
 
-完整代码可查看的 [ReactRouterDemo](https://github.com/SikyChen/simple-react-router/blob/main/src/ReactRouterDemo/index.jsx) 组件。
+完整代码可以参考 [ReactRouterDemo](https://github.com/SikyChen/simple-react-router/blob/main/src/ReactRouterDemo/index.jsx) 组件。
+
+
+# 重构
+
+现在来看一下 React-Router-Dom 的用法，参考该用法对我们的路由功能进行封装：
+
+``` javascript
+export default function App() {
+  return (
+    <BrowserRouter>
+      <div>
+        <div>
+          <Link to="/aa">AA</Link>
+          <Link to="/bb">BB</Link>
+          <Link to="/cc">CC</Link>
+          <Link to="/dd">DD</Link>
+        </div>
+
+        <Routes>
+          <Route path="/aa"><AA /></Route>
+          <Route path="/bb"><BB /></Route>
+          <Route path="/cc"><CC /></Route>
+          <Route path="/dd"><DD /></Route>
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
+}
+```
+
+从代码中可以看到，组合使用 `BrowserRouter` `Link` `Routes` `Route` 这几个组件即可实现一个简单的路由功能，而我们在上面简易实现当中所提到的 `handleLink` `refresh` 等逻辑都不需要编写，说明这些逻辑都被封装进组件当中了。
+
+## 功能分析
+
+重新对 `修改 URL` 和 `监听 URL 变化并匹配路由` 的过程进行分析：
+
+点击 `Link` 组件会改变 URL ，类似我们之前实现过的 `handleLink` 的逻辑。对于 `history.pushState()` 对 URL 作出的改变无法监听的问题，这次我们使用状态管理的办法进行解决。
+
+将 `location` 作为一份状态进行管理，当 `Link` 组件对该状态修改后，引入该状态的 `Routes` 将自动触发重新渲染，进而重新匹配 `Route` 进行显示。
+
+## 实现 BrowserRouter 组件
+
+通过上面的分析，可以想到 `BrowserRouter` 作为容器组件的作用，就是将 `location` 状态放在 `BrowserRouter` 中进行初始化，然后通过 `context` 共享给其子组件。示例代码如下：
+
+``` javascript
+// context.js
+export const LocationContext = React.createContext(null)
+
+// BrowserRouter.jsx
+export default function BrowserRouter(props) {
+
+  // ...
+
+  const [location, setLocation] = useState(window.location)
+
+  return (
+    <LocationContext.Provider value={location}>
+      {props.children}
+    </LocationContext.Provider>
+  )
+}
+```
+
+由于 `handleLink` 时，需要对 `location` 进行修改，所以这里再多定义一个 `context` 用于将修改 `location` 的方法传给子组件，并补充上修改调用 `history.pushState` 方法的相关代码如下：
+
+``` javascript
+// context.js
+export const LocationContext = React.createContext(null)
+export const NavigatorContext = React.createContext(null)
+
+// BrowserRouter.jsx
+export default function BrowserRouter(props) {
+
+  // ...
+
+  const [location, setLocation] = useState(window.location)
+  const navigator = {
+    push: handlePush,
+  }
+
+  useEffect(() => {
+    // 浏览器前进后退时触发更新
+    window.addEventListener('popstate', updateLoaction)
+  }, [])
+
+  function updateLoaction() {
+    setLocation({...window.location})
+  }
+
+  function handlePush(path) {
+    // 保留 ?search 和 #hash
+    const searchAndHash = location.href.split(location.pathname)[1];
+    window.history.pushState({}, '', path + searchAndHash)
+    updateLoaction()
+  }
+
+  return (
+    <LocationContext.Provider value={location}>
+      <NavigatorContext.Provider value={navigator}>
+        {props.children}
+      </NavigatorContext.Provider>
+    </LocationContext.Provider>
+  )
+}
+```
+
+## 实现 Link 组件
+
+现在只需要在 `Link` 组件中，调用 `navigator.push` 即可达到修改 URL 的目的了，所以对 `Link` 组件的实现如下：
+
+``` javascript
+// Link.jsx
+export default const Link = React.forwardRef((props, ref) => {
+
+  const navigator = React.useContext(NavigatorContext);
+
+  function handleClick(e) {
+    e.preventDefault()
+    navigator.push(props.to)
+  }
+
+  return <a href={props.to} onClick={handleClick} ref={ref}>{props.children}</a>
+})
+```
+
+## 实现 Routes Route 组件
+
+为了方便使用，将 `path` 定义在 `Route` 上了，那么 `BrowserRouter` 容器组件很难知道都定义了那些 `path` ，也不方便跨多层控制。所以再新增一个 `Routes` 容器专门对匹配和渲染 `Route` 进行管理。
+
+那么 `Routes` 的功能也呼之欲出了，就是读取 `location` 状态，拿到 `pathname` ，然后再遍历所有 `Route` 组件并比较其 `path` ，将匹配的 `Route` 显示即可，代码如下：
+
+``` javascript
+// Routes.jsx
+export default const Routes = (props) => {
+
+  const location = React.useContext(LocationContext);
+
+  const route = useMemo(() => {
+    return props.children.filter(child => child.props.path === location.pathname)
+  }, [props.children, location.pathname])
+
+  return route
+}
+```
+
+而 `Route` 本身则比较简单，只需要将其子组件返回即可：
+
+``` javascript
+export default const Route = (props) => props.component
+```
+
+至此，使用组件的方式实现路由功能，就已经完成了。
+
+# 结语
+
+通过这次学习，揭开了 `React Router` 神秘的面纱，了解了前端路由的主流程并完成了一个简易实现。
+
+基于这些核心逻辑，再去看 `React-Router-Dom` 的源码，相信会更容易理解些。
+
+另外，本文所涉及的所有代码，可以在 [simple-react-router](https://github.com/SikyChen/simple-react-router) 中查看。
