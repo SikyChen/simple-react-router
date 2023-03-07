@@ -44,18 +44,30 @@
 }
 
 .menu {
-  width: 100px;
+  width: 200px;
   background-color: slateblue;
 }
 
-.menu li {
-  line-height: 40px;
+.menu .title {
+  line-height: 50px;
   text-align: center;
+  border-bottom: 1px solid #eee;
+  color: yellowgreen;
+}
+
+.menu li {
+  line-height: 50px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
 }
 
 .menu li a {
   color: aliceblue;
   cursor: pointer;
+}
+
+.menu li a:hover {
+  color: #888;
 }
 
 .content {

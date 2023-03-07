@@ -1,11 +1,11 @@
-import { BroswerRouter, Link, Route, Routes } from "../simple-react-router/components";
-
+import { BroswerRouter, Link, Route, Routes } from "../../simple-react-router";
 
 export default function SimpleReactRouterDemo(props) {
 
   return (
     <BroswerRouter>
       <div className="menu">
+        <div className="title">重构组件版</div>
         <ul>
           <li><Link to="/aaaa">AAAA2</Link></li>
           <li><Link to="/bbbb">BBBB2</Link></li>

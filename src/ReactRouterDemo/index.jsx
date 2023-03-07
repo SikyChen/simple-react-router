@@ -27,6 +27,7 @@ export default function ReactRouterDemo(props) {
   return (
     <>
       <div className="menu">
+        <div className="title">简易实现</div>
         <ul>
           <li><a href="/aaaa" onClick={handleLink}>AAAA</a></li>
           <li><a href="/bbbb" onClick={handleLink}>BBBB</a></li>
